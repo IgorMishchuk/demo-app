@@ -8,7 +8,6 @@ on:
 
 env:
   REGION: eu-west-3
-  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 jobs:
   app:
@@ -33,6 +32,11 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-west-3
+
+    # Login to AWS ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
       
     # Install Terraform CLI
     # - name: Install Terraform CLI
@@ -42,6 +46,10 @@ jobs:
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Build
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: deploy-demo-app
+        TAG: ${{ github.sha }}
       run: make build
 
     # Checks that all Terraform configuration files adhere to a canonical format
@@ -50,6 +58,6 @@ jobs:
 
       # On push to main, build or change infrastructure according to Terraform configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-    - name: Push
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: make push
+    # - name: Push
+    #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    #   run: make push

@@ -75,7 +75,6 @@ push: build
 	set -e ; \
 	for registry in $(PUSH_REGISTRIES); do \
 		for tag in $(PUSH_TAGS); do \
-			aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin $${registry} \
 			docker tag "$(REGISTRY)/$(REPOSITORY):$(TAG)" "$${registry}/$(REPOSITORY):$${tag}"; \
 			docker push "$${registry}/$(REPOSITORY):$${tag}"; \
 		done \
